@@ -1,13 +1,13 @@
 package com.example.gabik.datepickertest;
 
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.DatePicker;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.NumberPicker;
 
 import java.util.Calendar;
 
@@ -21,24 +21,52 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DialogFragment newFragment = new SelectDateFragmentTrans();
-                newFragment.show(getFragmentManager(), "DatePicker");
+                MyDatePicker newFragment = new MyDatePicker();
+                newFragment.show(getFragmentManager(), "MyDatePicker");
             }
         });
     }
 
-    public static class SelectDateFragmentTrans extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+    public static class MyDatePicker extends DialogFragment {
 
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Calendar calendar = Calendar.getInstance();
-            int yy = calendar.get(Calendar.YEAR);
-            int mm = calendar.get(Calendar.MONTH);
-            int dd = calendar.get(Calendar.DAY_OF_MONTH);
-            return new DatePickerDialog(getActivity(), this, yy, mm, dd);
+        public interface EditNameDialogListener {
+            void onFinishEditDialog(String inputText);
         }
 
-        public void onDateSet(DatePicker view, int yy, int mm, int dd) {
+        public MyDatePicker() {
+            // Empty constructor required for DialogFragment
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            Calendar cc = Calendar.getInstance();
+            final int mon = cc.get(Calendar.MONTH) + 1;
+            final int year = cc.get(Calendar.YEAR);
+            View view = inflater.inflate(R.layout.custom_date_picker, container);
+            getDialog().setTitle("Please Choose Month and Year");
+
+            final NumberPicker mp = (NumberPicker) view.findViewById(R.id.monthPicker);
+            final NumberPicker yp = (NumberPicker) view.findViewById(R.id.yearPicker);
+            mp.setMaxValue(12);
+            mp.setMinValue(mon);
+            mp.setValue(mon);
+            mp.setWrapSelectorWheel(false);
+//            mp.setOnValueChangedListener(this);
+
+            yp.setMaxValue(year+1);
+            yp.setMinValue(year);
+            yp.setValue(year);
+            yp.setWrapSelectorWheel(false);
+            yp.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    if (newVal == year) { mp.setMinValue(mon); }
+                    else {mp.setMinValue(1); mp.setValue(1);}
+                }
+            });
+
+            return view;
         }
 
     }
